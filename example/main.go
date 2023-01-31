@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	go_hass_ws "github.com/calmera/go-hass-ws"
 )
@@ -17,5 +18,19 @@ func main() {
 	}
 	defer hass.Close()
 
-	fmt.Printf("Connected to HASS version %s!", hass.Version)
+	fmt.Printf("Connected to HASS version %s!\n", hass.Version)
+
+	fmt.Println()
+	fmt.Println("retrieving states:")
+	err = hass.GetStates(func(states map[string]go_hass_ws.State) {
+		for _, v := range states {
+			b, _ := json.Marshal(v)
+			fmt.Printf("%s\n", b)
+		}
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	hass.WaitUntilAllHandled()
 }
