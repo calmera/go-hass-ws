@@ -104,3 +104,37 @@ func (hc *HassClient) GetStates(cb StatesCallback) error {
 		return true, nil
 	})
 }
+
+func (hc *HassClient) GetConfig(cb ConfigCallback) error {
+	return hc.call_command("get_config", func(msg HassAuthenticatedMessage) (bool, error) {
+		if !msg.Success {
+			return true, fmt.Errorf("request failed")
+		}
+
+		var config HassConfig
+		if err := json.Unmarshal(msg.Result, &config); err != nil {
+			return true, err
+		}
+
+		cb(config)
+
+		return true, nil
+	})
+}
+
+func (hc *HassClient) GetServices(cb ServicesCallback) error {
+	return hc.call_command("get_services", func(msg HassAuthenticatedMessage) (bool, error) {
+		if !msg.Success {
+			return true, fmt.Errorf("request failed")
+		}
+
+		var services map[string]ServiceDomain
+		if err := json.Unmarshal(msg.Result, &services); err != nil {
+			return true, err
+		}
+
+		cb(services)
+
+		return true, nil
+	})
+}

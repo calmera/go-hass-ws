@@ -1,5 +1,7 @@
 package go_hass_ws
 
+import "encoding/json"
+
 type CommandMessage struct {
 	Id   uint64 `json:"id"`
 	Type string `json:"type"`
@@ -17,8 +19,18 @@ type State struct {
 type ConfigCallback func(config HassConfig)
 type HassConfig map[string]interface{}
 
-type ServicesCallback func(services map[string]Service)
+type ServicesCallback func(services map[string]ServiceDomain)
+type ServiceDomain map[string]Service
 type Service struct {
-	Domain   string   `json:"domain"`
-	Services []string `json:"services"`
+	Name        string                  `json:"name"`
+	Description string                  `json:"description"`
+	Fields      map[string]ServiceField `json:"fields"`
+	Target      map[string]interface{}  `json:"target"`
+}
+type ServiceField struct {
+	Name        string                     `json:"name"`
+	Description string                     `json:"description"`
+	Required    bool                       `json:"required"`
+	Example     interface{}                `json:"example"`
+	Selector    map[string]json.RawMessage `json:"selector"`
 }

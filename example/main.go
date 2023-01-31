@@ -18,14 +18,43 @@ func main() {
 	}
 	defer hass.Close()
 
+	go func() {
+		for {
+			select {
+			case err := <-hass.Errors:
+				println(err.Error())
+			}
+		}
+	}()
+
 	fmt.Printf("Connected to HASS version %s!\n", hass.Version)
 
-	fmt.Println()
-	fmt.Println("retrieving states:")
 	err = hass.GetStates(func(states map[string]go_hass_ws.State) {
 		for _, v := range states {
 			b, _ := json.Marshal(v)
-			fmt.Printf("%s\n", b)
+			fmt.Printf("state: %s\n", b)
+		}
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println()
+
+	err = hass.GetConfig(func(config go_hass_ws.HassConfig) {
+		b, _ := json.Marshal(config)
+		fmt.Printf("config: %s\n", b)
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	err = hass.GetServices(func(services map[string]go_hass_ws.ServiceDomain) {
+		for domain, v := range services {
+			for serviceName, service := range v {
+				b, _ := json.Marshal(service)
+				fmt.Printf("service: %s.%s -> %s\n", domain, serviceName, b)
+			}
 		}
 	})
 	if err != nil {
